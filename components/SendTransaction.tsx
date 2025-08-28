@@ -114,27 +114,27 @@ export default function SendTransaction({ wallet }: SendTransactionProps) {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-medium text-gray-800">Send Transaction</h3>
+      <h3 className="text-xl font-semibold text-white">Send Transaction</h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
           onClick={() => setTransactionType('native')}
-          className={`p-4 rounded-lg border-2 transition-colors ${
+          className={`p-4 rounded-xl border-2 transition-all duration-200 ${
             transactionType === 'native'
-              ? 'border-blue-500 bg-blue-50 text-blue-700'
-              : 'border-gray-300 text-gray-700 hover:border-gray-400'
+              ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+              : 'border-gray-600 bg-gray-700/50 text-gray-300 hover:border-gray-500'
           }`}
         >
           <div className="text-2xl mb-2">💎</div>
           <div className="font-medium">Native Token</div>
-          <div className="text-sm text-gray-500">Send ETH/MATIC</div>
+          <div className="text-sm text-gray-400">Send ETH/MATIC</div>
         </button>
         <button
           onClick={() => setTransactionType('erc20')}
           className={`p-4 rounded-lg border-2 transition-colors ${
             transactionType === 'erc20'
-              ? 'border-blue-500 bg-blue-50 text-blue-700'
-              : 'border-gray-300 text-gray-700 hover:border-gray-400'
+              ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+              : 'border-gray-600 bg-gray-700/50 text-gray-300 hover:border-gray-500'
           }`}
         >
           <div className="text-2xl mb-2">🪙</div>
@@ -146,8 +146,8 @@ export default function SendTransaction({ wallet }: SendTransactionProps) {
           onClick={() => setTransactionType('crosschain')}
           className={`p-4 rounded-lg border-2 transition-colors ${
             transactionType === 'crosschain'
-              ? 'border-blue-500 bg-blue-50 text-blue-700'
-              : 'border-gray-300 text-gray-700 hover:border-gray-400'
+              ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+              : 'border-gray-600 bg-gray-700/50 text-gray-300 hover:border-gray-500'
           }`}
         >
           <div className="text-2xl mb-2">🌉</div>
@@ -158,7 +158,7 @@ export default function SendTransaction({ wallet }: SendTransactionProps) {
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
             Recipient Address
           </label>
           <input
@@ -166,7 +166,7 @@ export default function SendTransaction({ wallet }: SendTransactionProps) {
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
             placeholder="0x..."
-            className="input-field text-gray-600"
+            className="w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -241,19 +241,19 @@ export default function SendTransaction({ wallet }: SendTransactionProps) {
         <button
           onClick={sendTransaction}
           disabled={disableSend}
-          className="w-full btn-primary disabled:opacity-50"
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200"
         >
           {isSending ? 'Sending...' : 'Send Transaction'}
         </button>
 
         {error && (
-          <div className="text-red-600 text-sm bg-red-50 p-3 rounded">
+          <div className="bg-red-900/20 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="text-green-600 text-sm bg-red-50 p-3 rounded">
+          <div className="bg-green-900/20 border border-green-500/30 text-green-400 px-4 py-3 rounded-xl">
             {success}
           </div>
         )}

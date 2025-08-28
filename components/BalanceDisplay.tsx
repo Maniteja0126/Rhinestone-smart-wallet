@@ -39,14 +39,18 @@ export default function BalanceDisplay({ wallet }: BalanceDisplayProps) {
   }, [wallet]);
 
 
-  return <>
-  <span>{balance} </span>
-   <button onClick={fetchBalance} className='btn-primary btn-sm ml-2 cursor-pointer'>Refresh</button>
+  return (
+    <div className="bg-gray-900/50 border border-gray-600 rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-white text-2xl font-bold">Balance: {balance}</span>
+        <button onClick={fetchBalance} className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors'>
+          Refresh
+        </button>
+      </div>
 
-   <div>
-    <div>
-        <span>Chain: {chain}</span>
+      <div className="text-gray-400 text-sm">
+        Chain: {chain}
+      </div>
     </div>
-   </div>
-  </> 
+  )
 }

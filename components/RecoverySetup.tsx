@@ -37,13 +37,13 @@ export default function RecoverWallet({wallet} : {wallet : RhinestoneWallet}) {
         setStatus("recovery completed");
     }
     return (
-        <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-800">Recovery</h3>
+        <div className="space-y-6 bg-gray-900 border border-gray-700 rounded-lg p-6">
+        <h3 className="text-lg font-medium text-white">Recovery</h3>
   
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Guardian Private Keys</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Guardian Private Keys</label>
           <input
-            className="input-field text-gray-600"
+            className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="0xabc...,0xdef..."
             value={guardianKeys}
             onChange={e => setGuardianKeys(e.target.value)}
@@ -51,10 +51,10 @@ export default function RecoverWallet({wallet} : {wallet : RhinestoneWallet}) {
         </div>
   
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Threshold</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Threshold</label>
           <input
             type="number"
-            className="input-field text-gray-600"
+            className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             min={1}
             value={threshold}
             onChange={e => setThreshold(Number(e.target.value))}
@@ -62,11 +62,11 @@ export default function RecoverWallet({wallet} : {wallet : RhinestoneWallet}) {
         </div>
   
         <div className="flex gap-2">
-          <button className="btn-primary" onClick={setUpGuardians}>Set Up Guardians</button>
-          <button className="btn-primary" onClick={startPasskeyRecovery}>Recover Passkey</button>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors" onClick={setUpGuardians}>Set Up Guardians</button>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors" onClick={startPasskeyRecovery}>Recover Passkey</button>
         </div>
   
-        {status && <div className="text-sm text-green-700">{status}</div>}
+        {status && <div className="text-sm text-green-400 bg-green-900/20 border border-green-500/30 p-3 rounded">{status}</div>}
       </div>
     )
 }

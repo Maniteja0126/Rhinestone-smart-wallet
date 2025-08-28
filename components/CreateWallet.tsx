@@ -92,8 +92,8 @@ export default function CreateWallet({onWalletCreated} : CreateWalletProps) {
     }
 
     return (
-        <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <div className="max-w-md mx-auto bg-gray-900 rounded-lg shadow-lg border border-gray-700 p-6">
+          <h2 className="text-2xl font-bold text-white mb-6">
             Create Your Wallet
           </h2>
     
@@ -103,8 +103,8 @@ export default function CreateWallet({onWalletCreated} : CreateWalletProps) {
                 onClick={() => setWalletType('ecdsa')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-colors ${
                   walletType === 'ecdsa'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                    ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                    : 'border-gray-600 bg-gray-800 text-gray-300 hover:border-gray-500'
                 }`}
               >
                 🔐 ECDSA Wallet
@@ -113,14 +113,15 @@ export default function CreateWallet({onWalletCreated} : CreateWalletProps) {
                 onClick={() => setWalletType('passkey')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-colors ${
                   walletType === 'passkey'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                    ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                    : 'border-gray-600 bg-gray-800 text-gray-300 hover:border-gray-500'
                 }`}
               >
                 🔑 Passkey Wallet
               </button>
             </div>
-            <p className="text-sm text-gray-600">
+            
+            <p className="text-sm text-gray-400">
           {walletType === 'ecdsa' 
             ? 'Traditional private key-based wallet'
             : 'Secure biometric/device-based authentication'
@@ -130,13 +131,13 @@ export default function CreateWallet({onWalletCreated} : CreateWalletProps) {
         <button
           onClick={walletType === 'ecdsa' ? createEcdsaWallet : createPasskeyWallet}
           disabled={isCreating}
-          className="w-full btn-primary disabled:opacity-50"
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
         >
           {isCreating ? 'Creating...' : 'Create Wallet'}
         </button>
 
         {error && (
-          <div className="text-red-600 text-sm bg-red-50 p-3 rounded">
+          <div className="text-red-400 text-sm bg-red-900/20 border border-red-500/30 p-3 rounded">
             {error}
           </div>
         )}

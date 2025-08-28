@@ -27,66 +27,97 @@ export default function WalletPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          Rhinestone Wallet
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Rhinestone Wallet
+          </h1>
+        </div>
 
         {!wallet ? (
           <CreateWallet onWalletCreated={setWallet} />
         ) : (
-          <div className="space-y-6">
-            
-            <div className="bg-white rounded-lg shadow">
-              <nav className="flex space-x-8 px-6 border-b">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <span className="mr-2">{tab.icon}</span>
-                    {tab.name}
-                  </button>
-                ))}
-              </nav>
+          <div className="max-w-4xl mx-auto">
+            <div className="flex space-x-1 bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-1 mb-6">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-md transition-all duration-200 ${
+                  activeTab === 'overview'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                }`}
+              >
+                <span>🏠</span>
+                <span>Overview</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('send')}
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-md transition-all duration-200 ${
+                  activeTab === 'send'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                }`}
+              >
+                <span>📤</span>
+                <span>Send</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('passkeys')}
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-md transition-all duration-200 ${
+                  activeTab === 'passkeys'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                }`}
+              >
+                <span>🔑</span>
+                <span>Passkeys</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('recovery')}
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-md transition-all duration-200 ${
+                  activeTab === 'recovery'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                }`}
+              >
+                <span>🛡️</span>
+                <span>Recovery</span>
+              </button>
+            </div>
 
-              <div className="p-6">
-                {activeTab === 'overview' && (
-                  <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-800">Wallet Overview</h3>
-                  <p className="text-gray-600">
-                    Address: {wallet.getAddress()}
-                  </p>
-                  <p className="text-gray-600">
-                    Balance: <BalanceDisplay wallet={wallet} />
-                  </p>
-                  
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6 shadow-2xl">
+              {activeTab === 'overview' && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold text-white mb-6">Wallet Overview</h2>
+                  <div className="bg-gray-900/50 border border-gray-600 rounded-xl p-4">
+                    <div className="text-sm text-gray-400 mb-2">Address:</div>
+                    <div className="font-mono text-white text-sm break-all">
+                      {wallet.getAddress()}
+                    </div>
+                  </div>
+                  <BalanceDisplay wallet={wallet} />
                 </div>
-                )}
-
-                {activeTab === 'send' && (
-                  <SendTransaction wallet={wallet} />
-                )}
-
-                {activeTab === 'passkeys' && (
-                  <PasskeySetup wallet={wallet} />
-                )}
-
-                {activeTab === 'recovery' && (
-                  <RecoverWallet wallet={wallet} />
-                )}
-
-              </div>
+              )}
+              
+              {activeTab === 'send' && (
+                <SendTransaction wallet={wallet} />
+              )}
+              
+              {activeTab === 'passkeys' && (
+                <PasskeySetup wallet={wallet} />
+              )}
+              
+              {activeTab === 'recovery' && (
+                <RecoverWallet wallet={wallet} />
+              )}
             </div>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

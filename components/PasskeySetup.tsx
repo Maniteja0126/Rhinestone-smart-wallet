@@ -41,25 +41,25 @@ export default function PasskeySetup({ wallet }: PasskeySetupProps) {
   const hasPasskey = !!localStorage.getItem('passkey_credential')
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-lg font-medium text-gray-800">Passkey Management</h3>
+    <div className="space-y-6 bg-gray-900 border border-gray-700 rounded-lg p-6">
+      <h3 className="text-lg font-medium text-white">Passkey Management</h3>
 
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <p className="text-sm text-gray-600 mb-4">
+      <div className="bg-gray-800 p-4 rounded-lg border border-gray-600">
+        <p className="text-sm text-gray-300 mb-4">
           Passkeys provide secure, biometric authentication for your wallet. 
           They're stored on your device and can't be stolen like private keys.
         </p>
 
         {hasPasskey ? (
           <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-green-600">
+            <div className="flex items-center space-x-2 text-green-400 bg-green-900/20 border border-green-500/30 p-3 rounded">
               <span className="text-xl">✅</span>
               <span>Passkey is registered</span>
             </div>
             
             <button
               onClick={removePasskey}
-              className="btn-secondary"
+              className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
             >
               Remove Passkey
             </button>
@@ -68,7 +68,7 @@ export default function PasskeySetup({ wallet }: PasskeySetupProps) {
           <button
             onClick={registerPasskey}
             disabled={isRegistering}
-            className="btn-primary disabled:opacity-50"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
           >
             {isRegistering ? 'Registering...' : 'Register Passkey'}
           </button>
@@ -76,13 +76,13 @@ export default function PasskeySetup({ wallet }: PasskeySetupProps) {
       </div>
 
       {error && (
-        <div className="text-red-600 text-sm bg-red-50 p-3 rounded">
+        <div className="text-red-400 text-sm bg-red-900/20 border border-red-500/30 p-3 rounded">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="text-green-600 text-sm bg-green-50 p-3 rounded">
+        <div className="text-green-400 text-sm bg-green-900/20 border border-green-500/30 p-3 rounded">
           {success}
         </div>
       )}
