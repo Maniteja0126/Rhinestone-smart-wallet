@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-// import WalletCard from '@/components/WalletCard'
 import CreateWallet from '@/components/CreateWallet'
 import SendTransaction from '@/components/SendTransaction'
 import BalanceDisplay from '@/components/BalanceDisplay'
@@ -38,7 +37,6 @@ export default function WalletPage() {
           <CreateWallet onWalletCreated={setWallet} />
         ) : (
           <div className="space-y-6">
-            {/* <WalletCard wallet={wallet} /> */}
             
             <div className="bg-white rounded-lg shadow">
               <nav className="flex space-x-8 px-6 border-b">

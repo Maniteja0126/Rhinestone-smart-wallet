@@ -37,23 +37,7 @@ export class RhinestoneWallet {
     }
 
     async initialize() {
-        // let accountConfig: any;
-        // if (this.config.owners.type === "passkey") {
-        //     accountConfig = {
-        //         ...this.config,
-        //         owners: [this.config.owners]
-        //     };
-        // } else if (this.config.owners.type === "ecdsa") {
-        //     accountConfig = {
-        //         ...this.config,
-        //         owners: [this.config.owners]
-        //     };
-        // } else {
-        //     throw new Error("Unsupported owner type");
-        // }
-        // this.account = await createRhinestoneAccount(accountConfig);
 
-        const primaryAccount = this.config.owners.accounts[0];
 
         this.account = await createRhinestoneAccount({
           owners: {
