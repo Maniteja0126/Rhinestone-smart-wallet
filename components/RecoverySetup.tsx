@@ -16,7 +16,7 @@ export default function RecoverWallet({wallet} : {wallet : RhinestoneWallet}) {
 
     const setUpGuardians = async () => {
         const guardians = toGuardianAccounts();
-        await wallet.setUpguardians({guardians , threshold} , baseSepolia);
+        await wallet.setUpGuardians({guardians , threshold} , baseSepolia);
         setStatus("Gaurdians set up");
     }
 

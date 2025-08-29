@@ -1,36 +1,38 @@
-# Rhinestone Wallet - Smart Account with Passkey & Social Recovery
+# Rhinestone Smart Wallet
 
-A Next.js-based smart wallet application built on Rhinestone SDK, featuring WebAuthn passkey authentication and social recovery capabilities.
+A Next.js-based smart wallet application built with the Rhinestone SDK, featuring passkey authentication, guardian recovery, and account abstraction capabilities.
 
 ## 🚀 Features
 
-- **Smart Account Wallet**: ERC-4337 compatible smart contract wallet
-- **Passkey Authentication**: Secure biometric/device-based authentication using WebAuthn
-- **ECDSA Support**: Traditional private key-based wallet option
-- **Social Recovery**: Guardian-based account recovery system
+- **Smart Account Wallet**: ERC-4337 compatible smart contract wallet using Rhinestone SDK
+- **Passkey Authentication**: Secure biometric authentication with WebAuthn (Touch ID, Face ID, Windows Hello)
+- **ECDSA Wallet Support**: Traditional private key-based wallet option with secure backup
+- **Guardian Recovery System**: Social recovery with trusted guardians and configurable thresholds
+- **Wallet Persistence**: Automatic wallet restoration on page refresh with secure storage
 - **Multi-Chain Support**: Base Sepolia and Arbitrum Sepolia testnets
-- **Cross-Chain Transactions**: Native token and ERC-20 transfers across chains
+- **Cross-Chain Transactions**: Native token and ERC-20 transfers across supported chains
+- **Portfolio Management**: Real-time balance display across multiple chains
 
-## Architecture
+## 🏗️ Architecture
 
 ### Core Components
-- **RhinestoneWallet**: Smart account wrapper with recovery methods
-- **WebAuthnHelper**: WebAuthn credential management
-- **Recovery System**: Guardian-based account recovery
-- **Transaction Engine**: Multi-chain transaction handling
+- **RhinestoneWallet**: Main wallet class with transaction and recovery methods
+- **WalletProvider**: React context for wallet state management and persistence
+- **GuardianSetup**: Component for configuring guardian recovery
+- **WalletRecovery**: Recovery interface supporting private key and guardian-based restoration
+- **WebAuthnHelper**: WebAuthn credential management utilities
 
 ### Technology Stack
 - **Frontend**: Next.js 15 + React 19 + TypeScript
-- **Blockchain**: Rhinestone SDK + viem
-- **Styling**: Tailwind CSS 4
+- **Blockchain**: Rhinestone SDK + viem for Ethereum interactions
+- **Styling**: Tailwind CSS for responsive design
 - **Networks**: Base Sepolia, Arbitrum Sepolia testnets
 
-
-##  Configuration
+## ⚙️ Configuration
 
 ### Environment Variables
 ```env
-# Optional: For fee sponsorship on testnet
+# Required: Rhinestone API key for smart account operations
 NEXT_PUBLIC_RHINESTONE_API_KEY=your_api_key_here
 ```
 
@@ -38,48 +40,92 @@ NEXT_PUBLIC_RHINESTONE_API_KEY=your_api_key_here
 - **Base Sepolia** (Chain ID: 84532)
 - **Arbitrum Sepolia** (Chain ID: 421614)
 
-##  Usage Flow
+## 📱 Application Flow
 
 ### 1. Wallet Creation
+
+**Passkey Wallet:**
 ```typescript
-// Create passkey wallet
-const credential = await WebauthnHelper.createCredential(userId, userName);
+// Create WebAuthn credential
+const credential = await createWebAuthnCredential({
+  name: `Rhinestone Wallet ${Date.now()}`,
+});
+
 const passkeyAccount = toWebAuthnAccount({ credential });
 
-const wallet = new RhinestoneWallet({
-  owners: {
-    type: "passkey",
-    accounts: [passkeyAccount]
-  }
-}, baseSepolia);
+// Initialize wallet with Rhinestone SDK
+const config: WalletConfig = {
+  owners: { type: 'passkey', accounts: [passkeyAccount] },
+  rhinestoneApiKey: process.env.NEXT_PUBLIC_RHINESTONE_API_KEY,
+};
 
+const wallet = new RhinestoneWallet(config, baseSepolia);
 await wallet.initialize();
 ```
 
-### 2. Social Recovery Setup
+**ECDSA Wallet:**
 ```typescript
-// Configure guardians
-await wallet.setUpguardians({
-  guardians: [guardianAccount1, guardianAccount2],
-  threshold: 2
-}, baseSepolia);
+// Generate owner account
+const ownerPrivateKey = generatePrivateKey();
+const ownerAccount = privateKeyToAccount(ownerPrivateKey);
+
+const config: WalletConfig = {
+  owners: { type: 'ecdsa', accounts: [ownerAccount] },
+  rhinestoneApiKey: process.env.NEXT_PUBLIC_RHINESTONE_API_KEY,
+};
+
+const wallet = new RhinestoneWallet(config, baseSepolia);
+await wallet.initialize();
 ```
 
-### 3. Account Recovery
+### 2. Guardian Recovery Setup
+
 ```typescript
-// Create new passkey and recover
-const newCredential = await WebauthnHelper.createCredential(userId, userName);
-await wallet.recoveryPasskey({
-  oldPasskeyPubKey: storedPubKey,
-  newCredential,
-  guardians,
+// Configure guardian addresses and threshold
+const guardianAccounts = validGuardians.map(guardian => ({
+  address: guardian.address as `0x${string}`,
+  type: 'json-rpc' as const,
+}));
+
+// Set up recovery on-chain
+await wallet.setUpGuardians(
+  {
+    guardians: guardianAccounts,
+    threshold: 2 // Require 2 of 3 guardians
+  },
+  baseSepolia
+);
+```
+
+### 3. Wallet Persistence & Restoration
+
+**Automatic Restoration:**
+```typescript
+// Wallet data is automatically stored and restored on page refresh
+const walletData = getStoredWallet();
+if (walletData) {
+  await restoreFromStoredData(walletData);
+}
+```
+
+**Manual Recovery Options:**
+```typescript
+// Private key recovery
+await restoreFromPrivateKey(privateKey);
+
+// Guardian-based recovery (future implementation)
+await recoverWalletByGuardians({
+  walletAddress,
+  newOwner,
+  guardianSignatures,
   chain: baseSepolia
 });
 ```
 
-### 4. Transaction Sending
+### 4. Transaction Operations
+
+**Send Native Tokens:**
 ```typescript
-// Send native token
 await wallet.sendTransaction({
   sourceChain: baseSepolia,
   targetChain: arbitrumSepolia,
@@ -87,70 +133,112 @@ await wallet.sendTransaction({
     to: recipientAddress,
     value: parseEther("0.1"),
     data: "0x"
-  }],
-  tokenRequests: []
+  }]
+});
+```
+
+**Send ERC-20 Tokens:**
+```typescript
+await wallet.sendTransaction({
+  sourceChain: baseSepolia,
+  targetChain: baseSepolia,
+  calls: [{
+    to: tokenAddress,
+    value: BigInt(0),
+    data: encodeFunctionData({
+      abi: erc20Abi,
+      functionName: "transfer",
+      args: [recipientAddress, parseEther("100")]
+    })
+  }]
 });
 ```
 
 ## 🔐 Security Features
 
 ### Passkey Authentication
-- **WebAuthn Standard**: FIDO2 compliant authentication
-- **Device Storage**: Private keys never leave the device
-- **Biometric Support**: Touch ID, Face ID, Windows Hello
+- **WebAuthn Standard**: FIDO2 compliant biometric authentication
+- **Device Security**: Private keys secured by device hardware
+- **Cross-Platform**: Works on mobile and desktop devices
+- **No Password Required**: Eliminates password-based vulnerabilities
 
-### Social Recovery
-- **Guardian System**: Multiple trusted accounts can recover access
-- **Threshold Control**: Configurable approval requirements
-- **No Timelock**: Immediate recovery after threshold met
+### Guardian Recovery System
+- **Social Recovery**: Trusted friends/family can help recover access
+- **Configurable Thresholds**: Require majority approval (e.g., 2 of 3 guardians)
+- **No Single Point of Failure**: Multiple recovery paths available
+- **On-Chain Setup**: Guardian configuration stored securely on blockchain
+
+### Wallet Persistence
+- **Secure Storage**: Wallet data encrypted and stored locally
+- **Session Management**: Automatic restoration without re-authentication
+- **Data Expiration**: Automatic cleanup of old wallet data
+- **Recovery Options**: Multiple paths to restore access
+
+## 🎯 User Interface
+
+### Main Wallet Interface
+- **Portfolio View**: Real-time balance display across chains
+- **Send Transactions**: Intuitive interface for token transfers
+- **Guardian Management**: Easy setup and management of recovery guardians
+- **Recovery Tools**: Private key and guardian-based recovery options
+
+### Mobile-Responsive Design
+- **Touch-Friendly**: Optimized for mobile wallet usage
+- **Progressive UI**: Icons on mobile, full labels on desktop
+- **Wallet-Like Experience**: Professional interface similar to popular wallets
+
+## 🧪 Testing & Development
 
 
-## 🧪 Testing
 
-### Testnet Setup
-1. **Get Testnet ETH**: Use Base Sepolia faucet
-2. **Test Passkey Creation**: Create wallet with biometric
-3. **Test Recovery Flow**: Set up guardians and test recovery
-4. **Test Transactions**: Send native and ERC-20 tokens
+### Testing Flow
+1. **Create Wallet**: Test both passkey and ECDSA wallet creation
+2. **Set Up Guardians**: Configure recovery guardians with test addresses
+3. **Test Transactions**: Send native and ERC-20 tokens on testnets
+4. **Test Persistence**: Refresh page and verify wallet restoration
+5. **Test Recovery**: Use private key recovery method
 
-### Test Networks
-- **Base Sepolia**: Primary testnet for development
-- **Arbitrum Sepolia**: Secondary testnet for cross-chain testing
+### Testnet Resources
+- **Base Sepolia Faucet**: Get testnet ETH for transactions
+- **Test Tokens**: Use provided testnet token addresses (USDC, WETH, DAI)
+- **Guardian Addresses**: Generate test addresses for guardian setup
 
-
-## �� API Reference
+## 📚 API Reference
 
 ### RhinestoneWallet Class
 ```typescript
 class RhinestoneWallet {
-  // Core methods
+  // Initialization
+  constructor(config: WalletConfig, creationChain?: Chain)
   async initialize(): Promise<any>
+  
+  // Account info
   getAddress(): string
   async getBalance(chain?: Chain): Promise<string>
+  async getPortfolio(): Promise<TokenBalance[]>
+  
+  // Guardian setup
+  async setUpGuardians(setup: RecoverySetup, chain: Chain): Promise<any>
   
   // Recovery methods
-  async setUpguardians(config: RecoverySetup, chain: Chain): Promise<any>
-  async recoveryPasskey(params: RecoveryParams): Promise<void>
-  async recoveryEcdsa(params: RecoveryParams): Promise<void>
+  async recoveryPasskey(params: PasskeyRecoveryParams): Promise<any>
+  async recoveryEcdsa(params: EcdsaRecoveryParams): Promise<any>
   
-  // Transaction methods
+  // Transactions
   async sendTransaction(params: TransactionParams): Promise<any>
   async signMessage(message: string): Promise<any>
+  
+  // Static methods
+  static async getWalletRecoveryInfo(address: string, chain: Chain): Promise<WalletRecoveryInfo>
+  static async recoverWalletByAddress(params: GuardianRecoveryParams): Promise<any>
 }
 ```
 
-### WebAuthnHelper
-```typescript
-class WebauthnHelper {
-  static async createCredential(userId: string, userName: string): Promise<PasskeyCredential>
-}
+
 ```
 
+## 🔗 Resources
 
-
-## �� Resources
-
-- [Rhinestone Documentation](https://docs.rhinestone.dev/)
-- [Base Network](https://base.org/)
-- [Arbitrum](https://arbitrum.io/)
+- [Rhinestone SDK Documentation](https://docs.rhinestone.dev/)
+- [ERC-4337 Account Abstraction](https://eips.ethereum.org/EIPS/eip-4337)
 

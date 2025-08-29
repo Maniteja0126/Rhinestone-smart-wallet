@@ -1,147 +1,111 @@
 'use client';
 
-import {useState} from "react";
-import { RhinestoneWallet , generateNewOwner, baseSepolia } from "@/lib/rhinestone";
-import { WebauthnHelper } from "@/lib/webauthn";
-import { toWebAuthnAccount } from "viem/account-abstraction";
+import React, { useState } from 'react';
+import { useWallet } from '@/lib/wallet-context';
 
+export default function CreateWallet() {
+  const { 
+    isLoading, 
+    error, 
+    createPasskeyWallet, 
+    createEcdsaWallet,
+    restoreFromStorage,
+    hasActiveWallet
+  } = useWallet();
+  
+  const [showRecovery, setShowRecovery] = useState(false);
 
-interface CreateWalletProps {
-    onWalletCreated : (wallet : RhinestoneWallet) => void;
-}
+  return (
+    <div className="max-w-md mx-auto space-y-6 bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-600 rounded-xl p-8 shadow-2xl">
+      <div className="text-center">
+        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-white mb-2">Rhinestone Smart Wallet</h2>
+        <p className="text-gray-400 text-sm">Powered by Rhinestone SDK</p>
+      </div>
 
-
-export default function CreateWallet({onWalletCreated} : CreateWalletProps) {
-    const [walletType , setWalletType ] = useState<"passkey" | "ecdsa">("passkey");
-    const [isCreating , setIsCreating] = useState(false);
-    const [error , setError] = useState("");
-
-    const createEcdsaWallet = async () =>{
-        try{
-            setIsCreating(true);
-            setError("");
-            const { privateKey, account } = generateNewOwner();
-
-
-            const wallet = new RhinestoneWallet({
-                owners : {
-                    type : "ecdsa",
-                    accounts : [account]
-                },
-            }, baseSepolia);
-
-            await wallet.initialize();
-            const walletAddress = wallet.getAddress();
-            sessionStorage.setItem('wallet_address', walletAddress);
-
-            onWalletCreated(wallet);
-        }catch(err) {
-            console.error("Error creating ECDSA wallet:", err);
-            setError("Failed to create wallet. Please try again.");
-        }finally{
-            setIsCreating(false);
-        }
-    }
-
-    const createPasskeyWallet = async () =>{
-        try{
-            setIsCreating(true);
-            setError("");
-
-            const userId = crypto.randomUUID();
-            const userName = `User ${userId.slice(0, 8)}`;
-
-            const credential = await WebauthnHelper.createCredential(userId, userName);
-
-            const publicKeyCredential = {
-                id: credential.id,
-                publicKey: credential.publicKey,
-                type: 'public-key',
-                rawId: new Uint8Array(),
-                response: {} as any,
-                getClientExtensionResults: () => ({}),
-                authenticatorAttachment: null
-            };
-
-            const passkeyAccount = toWebAuthnAccount({ 
-                credential: publicKeyCredential as any
-            });
-
-            sessionStorage.setItem("passkey_pubkey" , (passkeyAccount as any).publicKey);
-
-
-            const wallet = new RhinestoneWallet({
-                owners : {
-                    type : "passkey",
-                    accounts : [passkeyAccount as any]
-                },
-            }, baseSepolia);
-
-            await wallet.initialize();
-
-            const walletAddress = wallet.getAddress();
-            sessionStorage.setItem('wallet_address', walletAddress);
-
-            onWalletCreated(wallet);
-        }catch(err) {
-            console.error("Error creating Passkey wallet:", err);
-            setError("Failed to create wallet. Please try again.");
-        }finally{
-            setIsCreating(false);
-        }
-    }
-
-    return (
-        <div className="max-w-md mx-auto bg-gray-900 rounded-lg shadow-lg border border-gray-700 p-6">
-          <h2 className="text-2xl font-bold text-white mb-6">
-            Create Your Wallet
-          </h2>
-    
-          <div className="space-y-4">
-            <div className="flex space-x-4">
-              <button
-                onClick={() => setWalletType('ecdsa')}
-                className={`flex-1 py-3 px-4 rounded-lg border-2 transition-colors ${
-                  walletType === 'ecdsa'
-                    ? 'border-blue-500 bg-blue-500/20 text-blue-400'
-                    : 'border-gray-600 bg-gray-800 text-gray-300 hover:border-gray-500'
-                }`}
-              >
-                🔐 ECDSA Wallet
-              </button>
-              <button
-                onClick={() => setWalletType('passkey')}
-                className={`flex-1 py-3 px-4 rounded-lg border-2 transition-colors ${
-                  walletType === 'passkey'
-                    ? 'border-blue-500 bg-blue-500/20 text-blue-400'
-                    : 'border-gray-600 bg-gray-800 text-gray-300 hover:border-gray-500'
-                }`}
-              >
-                🔑 Passkey Wallet
-              </button>
+      {!hasActiveWallet() && localStorage.getItem('rhinestone_wallet') && (
+        <div className="bg-blue-900/20 border border-blue-500/50 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-300 text-sm font-medium">Wallet found</p>
+              <p className="text-blue-400 text-xs">Previous wallet data detected</p>
             </div>
-            
-            <p className="text-sm text-gray-400">
-          {walletType === 'ecdsa' 
-            ? 'Traditional private key-based wallet'
-            : 'Secure biometric/device-based authentication'
-          }
-        </p>
+            <button
+              onClick={restoreFromStorage}
+              disabled={isLoading}
+              className="text-blue-400 hover:text-blue-300 text-sm underline disabled:opacity-50"
+            >
+              {isLoading ? 'Restoring...' : 'Restore'}
+            </button>
+          </div>
+        </div>
+      )}
 
+      {error && (
+        <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4">
+          <p className="text-red-300 text-sm">{error}</p>
+          {error.includes('authentication') && (
+            <p className="text-red-400 text-xs mt-1">
+              For passkey wallets, you may need to authenticate with your biometric device.
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="space-y-4">
         <button
-          onClick={walletType === 'ecdsa' ? createEcdsaWallet : createPasskeyWallet}
-          disabled={isCreating}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+          onClick={createPasskeyWallet}
+          disabled={isLoading}
+          className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
         >
-          {isCreating ? 'Creating...' : 'Create Wallet'}
+          <div className="flex items-center justify-center">
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating...
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Create Passkey Wallet
+              </>
+            )}
+          </div>
+          <p className="text-xs text-gray-300 mt-1">Secure biometric authentication</p>
         </button>
 
-        {error && (
-          <div className="text-red-400 text-sm bg-red-900/20 border border-red-500/30 p-3 rounded">
-            {error}
+        <button
+          onClick={createEcdsaWallet}
+          disabled={isLoading}
+          className="w-full py-4 px-6 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
+        >
+          <div className="flex items-center justify-center">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z" />
+            </svg>
+            Create ECDSA Wallet
           </div>
-        )}
+          <p className="text-xs text-gray-300 mt-1">Private key based wallet</p>
+        </button>
+      </div>
+
+      <div className="text-center">
+        <div className="inline-flex items-center px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg">
+          <svg className="w-4 h-4 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-gray-300 text-xs">Smart Account • Account Abstraction</span>
+        </div>
       </div>
     </div>
-  )
+  );
 }

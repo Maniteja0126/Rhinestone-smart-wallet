@@ -18,15 +18,23 @@ export default function PasskeySetup({ wallet }: PasskeySetupProps) {
       setError('')
       setSuccess('')
 
+      if (!WebauthnHelper.isSupported()) {
+        throw new Error("WebAuthn is not supported in this browser")
+      }
+
       const userId = `user_${Date.now()}`
       const userName = 'Wallet User'
 
       const credential = await WebauthnHelper.createCredential(userId, userName)
       
-      localStorage.setItem('passkey_credential', JSON.stringify({id : credential.id}))
+      localStorage.setItem('passkey_credential', JSON.stringify({
+        id: credential.id,
+        publicKey: credential.publicKey
+      }))
       
       setSuccess('Passkey registered successfully! You can now use it to sign transactions.')
     } catch (err) {
+      console.error('Passkey registration error:', err)
       setError(err instanceof Error ? err.message : 'Failed to register passkey')
     } finally {
       setIsRegistering(false)
@@ -36,56 +44,71 @@ export default function PasskeySetup({ wallet }: PasskeySetupProps) {
   const removePasskey = () => {
     localStorage.removeItem('passkey_credential')
     setSuccess('Passkey removed successfully!')
+    setError('')
   }
 
   const hasPasskey = !!localStorage.getItem('passkey_credential')
 
   return (
     <div className="space-y-6 bg-gray-900 border border-gray-700 rounded-lg p-6">
-      <h3 className="text-lg font-medium text-white">Passkey Management</h3>
-
-      <div className="bg-gray-800 p-4 rounded-lg border border-gray-600">
-        <p className="text-sm text-gray-300 mb-4">
-          Passkeys provide secure, biometric authentication for your wallet. 
-          They're stored on your device and can't be stolen like private keys.
+      <h2 className="text-xl font-semibold text-white">Passkey Setup</h2>
+      
+      <div className="space-y-4">
+        <p className="text-gray-300 text-sm">
+          Set up a passkey for secure, biometric authentication. This will use your device's 
+          built-in security features like Touch ID, Face ID, or Windows Hello.
         </p>
 
-        {hasPasskey ? (
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-green-400 bg-green-900/20 border border-green-500/30 p-3 rounded">
-              <span className="text-xl">✅</span>
-              <span>Passkey is registered</span>
-            </div>
-            
-            <button
-              onClick={removePasskey}
-              className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              Remove Passkey
-            </button>
+        {error && (
+          <div className="p-3 rounded bg-red-900/20 border border-red-700">
+            <p className="text-red-300 text-sm">{error}</p>
           </div>
-        ) : (
-          <button
-            onClick={registerPasskey}
-            disabled={isRegistering}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-          >
-            {isRegistering ? 'Registering...' : 'Register Passkey'}
-          </button>
         )}
+
+        {success && (
+          <div className="p-3 rounded bg-green-900/20 border border-green-700">
+            <p className="text-green-300 text-sm">{success}</p>
+          </div>
+        )}
+
+        <div className="space-y-3">
+          {!hasPasskey ? (
+            <button
+              onClick={registerPasskey}
+              disabled={isRegistering || !WebauthnHelper.isSupported()}
+              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+            >
+              {isRegistering ? 'Registering...' : 'Register Passkey'}
+            </button>
+          ) : (
+            <div className="space-y-3">
+              <div className="p-3 rounded bg-green-900/20 border border-green-700">
+                <p className="text-green-300 text-sm">✓ Passkey is registered</p>
+              </div>
+              <button
+                onClick={removePasskey}
+                className="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+              >
+                Remove Passkey
+              </button>
+            </div>
+          )}
+
+          {!WebauthnHelper.isSupported() && (
+            <div className="p-3 rounded bg-yellow-900/20 border border-yellow-700">
+              <p className="text-yellow-300 text-sm">
+                ⚠️ WebAuthn is not supported in this browser. Please use a modern browser 
+                with WebAuthn support.
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="text-xs text-gray-400 space-y-1">
+          <p><strong>Note:</strong> Passkeys are stored securely on your device</p>
+          <p>Supported: Touch ID, Face ID, Windows Hello, security keys</p>
+        </div>
       </div>
-
-      {error && (
-        <div className="text-red-400 text-sm bg-red-900/20 border border-red-500/30 p-3 rounded">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="text-green-400 text-sm bg-green-900/20 border border-green-500/30 p-3 rounded">
-          {success}
-        </div>
-      )}
     </div>
   )
 }

@@ -97,7 +97,7 @@ export default function SendTransaction({ wallet }: SendTransactionProps) {
         tokenRequests,
       })
 
-      setSuccess(`Transaction sent successfully! Hash: ${result.intent.hash}`);
+      setSuccess(`Transaction sent successfully! Hash: ${result.tx.hash}`);
       setRecipient('')
       setAmount('')
       setTokenSymbol('USDC')
@@ -113,8 +113,16 @@ export default function SendTransaction({ wallet }: SendTransactionProps) {
   const disableSend = isSending || !recipient || !amount || (needsToken && !tokenSymbol);
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-xl font-semibold text-white">Send Transaction</h3>
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold text-white">Send Transaction</h2>
+        <div className="flex items-center space-x-2 text-gray-400">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
+          <span className="text-sm">Transfer</span>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
