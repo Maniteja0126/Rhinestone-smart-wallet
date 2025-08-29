@@ -235,7 +235,6 @@ class RhinestoneWallet {
 ```
 
 
-```
 
 ## 🔗 Resources
 
